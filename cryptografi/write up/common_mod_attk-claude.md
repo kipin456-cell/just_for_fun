@@ -70,7 +70,7 @@ c1 = 112742096964505823749073849181119557193496276289097308410885468971295119609
 
 c2 = 6622745364486873207289248738658625121070658961211100528911496770440739681356065939800341171189002318542641942843254576752545184081841731360511458991746842
 
-dari source code kita tau bahwa c1 dan c2 adalah plaintext yang sama yaitu flag,tapi c1 menggunakan e1 = 3 dan c2 menggunakan e2 = 65537.
+dari source code kita tau bahwa c1 dan c2 adalah hasil enkripsi dari plaintext yang sama yaitu flag,tapi c1 menggunakan e1 = 3 dan c2 menggunakan e2 = 65537.
 dan keduannya sama sama menggunakan n yang sama.oleh karena itu chall ini memiliki kerentanan Common Modulus Attack.kenapa?
 karena:
 1.pesan kita di enkripsi 2 kali menggunakan n yang sama
