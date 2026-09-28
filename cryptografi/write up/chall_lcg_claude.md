@@ -91,7 +91,7 @@ dan jika kita memilih opsi 1 lebih dari 2 kali maka server tidak memberikan angk
 
 <img width="257" height="403" alt="image" src="https://github.com/user-attachments/assets/028f5deb-ebdb-4213-8ec0-268530daacb5" />
 
-dari source code dan dari terminal saat kita menjalankan file,kita di kasih tau modulus dan multiplier,serta ada nilai increment yang di sembunyikan.dari juga source code ada rumus ```(MULTIPLIER * self.seed + INCREMENT) % MODULUS``` yang dimana ini adalah rumus dari LCG(Linear Congruential Generator)
+dari source code dan dari terminal saat kita menjalankan file,kita di kasih tau modulus dan multiplier,serta ada nilai increment yang di sembunyikan.dari source code juga ada rumus ```(MULTIPLIER * self.seed + INCREMENT) % MODULUS``` yang dimana ini adalah rumus dari LCG(Linear Congruential Generator)
 
 rumus : 
 
