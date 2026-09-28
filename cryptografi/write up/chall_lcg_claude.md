@@ -2,9 +2,10 @@
 ## catatan 
 ini adalah chall yang di buat oleh ai dan hanya bertujuan sebagai bahan latihan
 
-## langkah penyelesaian 
-deskripsi chall:
--
+## langkah penyelesaian
+
+deskripsi chall :
+tidak ada 
 
 analisis:
 source code:
