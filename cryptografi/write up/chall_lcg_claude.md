@@ -94,12 +94,18 @@ dari source code dan dari terminal saat kita menjalankan file,kita di kasih tau 
 
 rumus : 
 
-**x_next =(a * x_now + c)mod m**
+*x_next =(a * x_now + c)mod m*
+
+
 
 x_next  = angka selanjutnya
+
 a       = multiplier
+
 x_now   = angka sekarang
+
 c       = increment
+
 m       = modulus
 
 
