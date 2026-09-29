@@ -52,11 +52,15 @@ pertama tama untuk mencari m kita bisa pakai rumus:
 dst.
 
 
+
 penjelasan = 
 
 x1 = angka yang ada di index 0/angka pertama di leaks
 
 t0 = selisih angka di index ke 1 atau angka kedua dan angka index ke 0 atau angka pertama di leaks
+
+
+
 
 
 setalah dapat t0 sampai t ke 8 maka selanjutnya kita mencari T
