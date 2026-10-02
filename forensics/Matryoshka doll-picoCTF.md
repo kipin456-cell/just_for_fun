@@ -27,4 +27,17 @@ ketika ku unzip output.zip maka akan memunculkan folder base_image yang isinya 2
 
 <img width="336" height="77" alt="image" src="https://github.com/user-attachments/assets/795157b8-4d20-4cdf-bd81-f92de89c5cd6" />
 
+dan ketika ku buka 2_c.jpg isinya 
+
+<img width="250" height="486" alt="image" src="https://github.com/user-attachments/assets/5c11b4b6-fada-418d-8cd8-c633ff72e204" />
+
+jadi ketika kucoba unzip lagi muncul file jpg lagi, jadi aku terus mengunzip dan akhirnya di 4_c.jpg saat ku ekstrak ada flag.txt dan saat ku buka aku dapat flag
+
+<img width="799" height="511" alt="image" src="https://github.com/user-attachments/assets/e97af19c-9798-446e-bbb6-ecf7887b93c8" />
+
+flag = 
+
+<img width="407" height="71" alt="image" src="https://github.com/user-attachments/assets/9cf7945e-4300-49c2-9d9e-207e8b3abba4" />
+
+
 
