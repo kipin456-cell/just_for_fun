@@ -1,6 +1,6 @@
 # Matryoshka doll-picoCTF
 
-#deskripsi chall
+# deskripsi chall
 Matryoshka dolls are a set of wooden dolls of decreasing size placed one inside another. What's the final one? Image: dolls.jpg
 
 Hints :
@@ -8,7 +8,7 @@ Hints :
 
 2.Make sure to submit the flag as academy{XXXXX}
 
-##langkah penyelesaian 
+## langkah penyelesaian 
 
 pertama jika kita download dan buka dolls.jpg maka akan muncul
 
@@ -20,6 +20,13 @@ karena di petunjuk chall kita di kasih tau bahwa "Wait, you can hide files insid
 
 setelah ku binwalk ketahuan bahwa ada file zip yang menempel di dolls.jpg yang isinya file jpg ```272492        0x4286C         Zip archive data, at least v2.0 to extract, compressed size: 378929, uncompressed size: 383919, name: base_images/2_c.jpg``` 
 jadi aku menggunakan command ```dd if=dolls.jpg of=output.zip skip=272492 bs=1``` untuk memisah file di alamat 272492 yang ada di dolls.jpg dan akan disimpan di file output.zip
+
+penjelasan command ```dd``` = 
+if = input file(file awal yang mau kita dipisah)
+of = output file(yang akan menampung hasil setelah file dipisah)
+skip = untuk 'skip' biar file yang di pisah sesuai dengan alamatnya
+bs = bit size(ukuran mulai kita memotong nya berapa)
+
 
 <img width="826" height="208" alt="image" src="https://github.com/user-attachments/assets/b46947ef-0409-4044-b19d-f95fa6ddf322" />
 
