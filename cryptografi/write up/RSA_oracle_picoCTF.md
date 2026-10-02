@@ -60,6 +60,77 @@ penjelasan :
 - m = pesan yang kita cari
 - D(r) = deskripsi dari r(nilai yang kita pakai untuk memodifikasi c)
 
-ken
 
+tapi dikarenakan proses menghapus nilai modifikasi dari c_modif kita perlu n, maka kita harus mencari n terlebih dahulu dengan
+
+*k1 = D(2) . D(3) - D(6)*
+*k2 = D(3) . D(4) - D(12)*
+
+n = gcd(k1,k2)
+
+penjelasana  = 
+- D(angka) = decrypt server ke angka
+- k = hasil untuk di GCD kan
+  
+karena dalam RSA persamaan awalnya adalah 
+
+*D(x) = x^d mod n*
+
+*D(2)·D(3) = 2^d · 3^d mod n = 6^d mod n* (secara matematis sama dengan D(6) jika tanpa mod)
+
+karena hasil e.d-1 pasti kelipatan(k) dari phi n ,maka kita tinggal Decrypt 2 angka(di contoh D(2) dan D(3)) lalu mengalikan nya ,dan dikurangi decrypt server hasil perkalian kedua angka tersebut(di contoh D(6)).setelah itu lakukan proses yang sama dengan angka yang berbeda(di contoh = D(3) . D(4) - D(12))
+setelah mendapat k1 dan k2 kita gcd kan keduanya untuk menghasilkan n.
+
+nah baru setelah kita mendapat kunci yang di enkripsi pakai RSA tersebut,kita baru bisa mendekripsikan secret.enc dengan openssl
+
+**solver : **
+```python3
+from pwn import *
+from Crypto.Util.number import long_to_bytes
+intance = b"chatelaine.cylabacademy.net"
+port = 11151
+from math import gcd
+io = remote(intance,port)
+
+def decrypt(cipher):
+    io.recvuntil(b"decrypt.")
+    io.sendline(b"d")
+    io.sendlineafter(b": ",cipher)
+    io.recvuntil(b": ")
+    data = io.recvline().strip()
+    return data
+
+
+with open("password.enc",'r') as f:
+    pw_enc = f.readline()
+print(pw_enc)
+# a = decrypt(str(2).encode())
+# print(a)
+k1 = int(decrypt(str(2).encode()).decode(),16) * int(decrypt(str(2).encode()).decode(),16) - int(decrypt(str(4).encode()),16)
+
+k2 = int(decrypt(str(3).encode()).decode(),16) * int(decrypt(str(3).encode()).decode(),16) - int(decrypt(str(9).encode()).decode(),16)
+
+n = gcd(k1,k2)
+print(n)
+
+
+a = decrypt(str(2).encode())   
+# print(a)                    # = 2^d mod n
+c2 = (int(pw_enc) * 2)%n               # != c, jadi lolos filter
+m2 = decrypt(str(c2).encode())
+print(m2)                     # = m * 2^d mod n
+m = (int(m2.decode(),16) * pow(int(a,16), -1, n)) % n   # buang faktor 2^d
+
+print(long_to_bytes(m))
+
+import subprocess
+subprocess.run([
+    "openssl", "enc", "-aes-256-cbc", "-d",
+    "-in", "secret.enc",
+    "-pass", f"pass:{long_to_bytes(m).decode()}"
+])
+```
+
+Flag = 
+<img width="760" height="110" alt="image" src="https://github.com/user-attachments/assets/a97b5529-c7c9-449b-97b2-e8dc6a2fe4c7" />
 
