@@ -1,4 +1,4 @@
-# RSA_oracle_picoCT - write up
+# RSA_oracle_picoCTF - write up
 
 
 ## deskripsi chall
