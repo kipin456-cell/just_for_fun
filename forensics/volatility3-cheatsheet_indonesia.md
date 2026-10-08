@@ -214,3 +214,9 @@ awk '$2==1234'     # filter kolom ke-2 (PPID)
 | Proteksi `PAGE_EXECUTE_READWRITE` + `MZ header` | `malfind` |
 | VPN: `Outline.exe` (parent) menjalankan `tun2socks.exe` (child) | `pstree` (PID/PPID) |
 | Tunnel VPN menyembunyikan trafik dari NIDS | `tun2socks` = tunnel terenkripsi lewat proxy SOCKS |
+
+
+## 16 command
+
+<img width="1135" height="571" alt="image" src="https://github.com/user-attachments/assets/651629ac-7815-4018-b987-e58798d7c496" />
+
