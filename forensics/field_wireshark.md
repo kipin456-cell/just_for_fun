@@ -117,3 +117,104 @@ Yang paling sering dipakai, hafalkan dulu:
 |  |  |
 |  |  |
 |  |  |
+
+
+Claude
+
+Tinggal dua pertanyaan lagi: host name dan user account. Keduanya dicari lewat protokol yang “membocorkan” identitas komputer.
+
+Host name (pilih salah satu, cocokkan hasilnya):
+
+    Filter dhcp && eth.addr == <MAC kamu>, buka paket Request, lalu cari field Option: (12) Host Name.
+    Filter nbns, lalu lihat nama NetBIOS yang didaftarkan oleh 10.6.13.133.
+    Filter kerberos.CNameString. Nama yang berakhiran $ adalah nama komputer, dan itu juga bisa jadi host name.
+
+User account:
+
+    Filter kerberos.CNameString && ip.src == 10.6.13.133.
+    Pilih nama yang tidak berakhiran $. Akhiran $ artinya akun komputer, sedangkan yang tanpa $ adalah akun manusia.
+    Cara cepat: klik kanan field CNameString → Apply as Column, supaya semua nama langsung terlihat berjajar.
+
+Kalau Kerberos tidak muncul: filter ntlmssp.auth.username, atau smb2 && ip.src == 10.6.13.133. Nama user kadang muncul di salah satunya.
+
+Terakhir: kumpulkan 4 jawabanmu (IP, MAC, host name, user), lalu cek apakah semuanya konsisten. Misalnya, MAC dari DHCP harus sama dengan MAC di Ethernet II paket 10.6.13.133. Kalau ada yang tidak cocok, berarti ada yang salah ambil.
+
+Setelah itu, kirim hasilnya ke sini dan kita cek bareng.
+
+kalau di pcap lain,misalkan kalau di suruh mencari hostname lagi,yang perlu di cek apa ya(yang mutlak)
+Mengumpulkan sumber hostname dari opsi DHCP dan NBNS
+
+Tidak ada satu sumber yang mutlak, tapi ada beberapa protokol yang hampir selalu membocorkan host name. Cek sesuai urutan ini dan filter selalu berdasarkan IP atau MAC korban.
+
+Urutan pengecekan:
+#	Protokol	Filter	Field yang dilihat
+1	DHCP	dhcp atau dhcp.option.hostname	Option 12 (Host Name)
+2	NBNS	nbns	Nama di Name Registration atau Query
+3	Kerberos	kerberos.CNameString	Nama berakhiran $ (akun komputer)
+4	NTLM/SMB	ntlmssp.auth.hostname	Workstation name
+5	mDNS/LLMNR	mdns atau llmnr	Nama di query atau response
+
+Cara pakainya:
+
+    Mulai dari DHCP. Di sinilah host name paling sering muncul, terutama di paket Request.
+    Kalau DHCP kosong, lanjut NBNS lalu Kerberos. Di jaringan Windows (Active Directory) salah satunya hampir pasti ada.
+    Cocokkan minimal dua sumber. Kalau DHCP dan Kerberos memberi nama yang sama, itu jawabanmu.
+    Jangan salah ambil. Nama yang berakhiran $ di Kerberos kadang milik DC atau komputer lain, jadi pastikan IP sumbernya sama dengan korban.
+
+Kebiasaan yang membantu:
+
+    Pasang kolom eth.src dan ip.src supaya cepat melihat siapa pengirimnya.
+    Kalau jaringannya bukan Windows (Linux atau Mac), mDNS dan DHCP biasanya yang paling berguna.
+
+Mau aku masukkan ini ke checklist markdown pcap untuk dibawa ke event tanpa AI?
+
+Create a spreadsheet from your last answer.
+Read xlsx skill before creating spreadsheetSKILL.md
+Read xlsx skill before creating spreadsheet SKILL.md
+Claude’s response was interrupted.
+
+buat file md nya
+Created a file, shared files
+
+File pcap-hostname-checklist.md sudah jadi. Isinya tabel protokol beserta filter Wireshark-nya, langkah kerja, catatan penting, dan tips, jadi bisa dibawa ke event tanpa AI.
+
+Kalau mau, aku bisa gabungkan dengan checklist untuk IP, MAC, dan user account jadi satu file pcap lengkap.
+Pcap hostname checklist
+Document · MD 
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Pcap hostname checklist · MD
+# Checklist: Mencari Host Name di PCAP
+ 
+Gunakan urutan ini dan **selalu filter berdasarkan IP atau MAC korban**.
+ 
+## Urutan Pengecekan
+ 
+| # | Protokol | Filter Wireshark | Field yang Dilihat |
+|---|----------|------------------|--------------------|
+| 1 | DHCP | `dhcp` atau `dhcp.option.hostname` | Option 12 (Host Name) |
+| 2 | NBNS | `nbns` | Nama di Name Registration / Query |
+| 3 | Kerberos | `kerberos.CNameString` | Nama berakhiran `$` (akun komputer) |
+| 4 | NTLM / SMB | `ntlmssp.auth.hostname` | Workstation name |
+| 5 | mDNS / LLMNR | `mdns` atau `llmnr` | Nama di query atau response |
+ 
+## Langkah Kerja
+ 
+- [ ] Catat dulu IP dan MAC korban
+- [ ] Mulai dari **DHCP** (paling sering muncul, terutama di paket Request)
+- [ ] Kalau DHCP kosong, lanjut **NBNS**, lalu **Kerberos**
+- [ ] Cocokkan **minimal dua sumber**. Kalau hasilnya sama, itu jawabanmu
+- [ ] Pastikan IP sumber paket = IP korban (jangan ambil nama milik DC atau komputer lain)
+## Catatan Penting
+ 
+- Di Kerberos, akhiran `$` = **akun komputer**, tanpa `$` = **akun user**
+- Jaringan Windows (Active Directory): NBNS atau Kerberos hampir pasti ada
+- Jaringan Linux / Mac: **DHCP** dan **mDNS** biasanya paling berguna
+## Tips Wireshark
+ 
+- Pasang kolom `eth.src` dan `ip.src` agar cepat melihat siapa pengirimnya
+- Klik kanan sebuah field → **Apply as Column** untuk menampilkan banyak nilai sekaligus
+- Cross-check: MAC dari DHCP harus sama dengan MAC di Ethernet II paket korban
+ 
+Claude finished the response
