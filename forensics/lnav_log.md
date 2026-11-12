@@ -10,6 +10,7 @@ Catatan pribadi: kolom, query siap pakai, dan penjelasannya untuk menganalisis *
 |---|---|
 | Buka file | `TZ=UTC lnav namafile.log` |
 | Masuk mode SQL | Tekan `;` lalu ketik query, Enter |
+| Masuk mode perintah/filter | Tekan `:` lalu ketik perintah, Enter (lihat bagian 2) |
 | Panggil query sebelumnya | `;` lalu `↑` (lalu edit seperlunya) |
 | Kembali ke tampilan log | `q` (sekali saja; dua kali akan keluar dari lnav) |
 | Lihat semua tabel dan kolom | `;.schema` |
@@ -21,7 +22,124 @@ Catatan pribadi: kolom, query siap pakai, dan penjelasannya untuk menganalisis *
 
 ---
 
-## 2. Satu Baris Log dan Kolomnya
+## 2. Perintah `:` (Command Mode) dan Filter
+
+Di lnav ada dua "pintu masuk" perintah:
+
+| Awalan | Fungsi | Contoh |
+|---|---|---|
+| `;` | Menjalankan **query SQL** (menghitung, merangkum) | `;SELECT count(*) FROM access_log` |
+| `:` | Menjalankan **perintah lnav** (menyaring tampilan, menyimpan, dll.) | `:filter-out /healthz` |
+
+Cara pakai: tekan `:`, ketik perintah, lalu Enter. Tekan `Tab` untuk melengkapi nama perintah secara otomatis.
+
+### 2.1 Filter Teks
+
+Filter mengubah **tampilan log** (baris tertentu disembunyikan atau dipertahankan). Isi file log tidak berubah.
+
+| Perintah | Fungsi | Contoh |
+|---|---|---|
+| `:filter-in teks` | **Hanya tampilkan** baris yang cocok | `:filter-in login` |
+| `:filter-out teks` | **Sembunyikan** baris yang cocok | `:filter-out /healthz` |
+| `:disable-filter teks` | Matikan filter sementara (tidak dihapus) | `:disable-filter /healthz` |
+| `:enable-filter teks` | Hidupkan lagi filter yang dimatikan | `:enable-filter /healthz` |
+| `:delete-filter teks` | Hapus satu filter | `:delete-filter /healthz` |
+| `:reset-session` | Hapus **semua** filter dan kembali ke awal | `:reset-session` |
+
+Teks setelah `:disable-filter`, `:enable-filter`, dan `:delete-filter` harus **sama persis** dengan yang ditulis saat membuat filter.
+
+### 2.2 Filter Menumpuk
+
+Setiap `:filter-in` atau `:filter-out` baru **ditambahkan** ke filter yang sudah ada, dan semuanya berlaku bersamaan. Tidak perlu tanda khusus.
+
+```
+:filter-out /healthz
+:filter-out /static/|/images/|/favicon.ico
+```
+
+Baris yang tersisa adalah baris yang **tidak cocok** dengan filter pertama **dan** tidak cocok dengan filter kedua. Jangan jalankan `:reset-session` di antara keduanya, karena itu menghapus filter pertama.
+
+Kombinasi `:filter-in` dan `:filter-out` juga bisa:
+
+```
+:filter-in /api/
+:filter-out /healthz
+```
+Hanya baris yang mengandung `/api/` yang tampil, lalu yang berisi `/healthz` dibuang.
+
+Untuk melihat filter yang aktif, tekan `Tab` (panel filter terbuka, berisi daftar filter dan jenisnya).
+
+### 2.3 Pola (Regex) di Filter
+
+Teks filter dibaca sebagai **pola regex**, bukan teks biasa saja.
+
+| Pola | Arti | Contoh |
+|---|---|---|
+| `a\|b` | `a` **atau** `b` (tanda garis tegak `\|`) | `/static/\|/images/` |
+| `.` | Satu karakter apa saja | `HTTP/1.1` cocok juga dengan `HTTP/1x1` |
+| `\.` | Titik sungguhan | `favicon\.ico` |
+| `^` | Awal baris | `^203\.0\.113\.50` |
+| `$` | Akhir baris | |
+| `[0-9]` atau `\d` | Satu angka | `5[0-9][0-9]`, `5\d\d` |
+| `.*` | Karakter apa saja, sepanjang apa pun | `login.*401` |
+
+Hati-hati: filter mencocokkan teks pada **seluruh baris** (IP, URL, status, bytes, User-Agent), bukan hanya satu kolom. Misalnya `:filter-in 500` juga menangkap baris dengan ukuran `500` byte atau IP berisi `500`. Untuk hitungan yang presisi per kolom, pakai SQL (`WHERE sc_status = 500`).
+
+### 2.4 Filter Waktu dan Level
+
+| Perintah | Fungsi | Contoh |
+|---|---|---|
+| `:hide-lines-before waktu` | Sembunyikan baris **sebelum** waktu tertentu | `:hide-lines-before 2026-11-10 13:00:00` |
+| `:hide-lines-after waktu` | Sembunyikan baris **sesudah** waktu tertentu | `:hide-lines-after 2026-11-10 14:00:00` |
+| `:show-lines-before-and-after` | Batalkan dua filter waktu di atas | `:show-lines-before-and-after` |
+| `:set-min-log-level level` | Tampilkan hanya level tertentu ke atas | `:set-min-log-level error` |
+
+Contoh menyorot satu jam kejadian: jalankan `:hide-lines-before` dan `:hide-lines-after` dengan jam awal dan akhir. Nilai level yang umum: `warning`, `error`. Untuk access log, 4xx dianggap *warning* dan 5xx *error*.
+
+### 2.5 Perintah `:` Lain yang Berguna
+
+| Perintah | Fungsi | Contoh |
+|---|---|---|
+| `:goto` | Lompat ke baris tertentu | `:goto 100` |
+| `:highlight teks` | Beri sorotan warna pada teks (tanpa menyembunyikan baris) | `:highlight 401` |
+| `:clear-highlight teks` | Hapus sorotan | `:clear-highlight 401` |
+| `:write-to file` | Simpan baris yang tampil ke file | `:write-to /tmp/hasil.log` |
+| `:write-csv-to file` | Simpan hasil query SQL ke CSV | `:write-csv-to /tmp/hasil.csv` |
+| `:help` | Bantuan perintah | `:help` |
+
+`:highlight` cocok saat ingin menandai sesuatu (misalnya satu IP) tanpa menghilangkan baris lain di sekitarnya.
+
+### 2.6 Beda Filter `:` dan `WHERE` pada SQL
+
+| | Filter `:` | `WHERE` pada SQL |
+|---|---|---|
+| Untuk apa | **Membaca** log lebih nyaman (menyembunyikan bising) | **Menghitung** dan merangkum |
+| Hasil | Baris log tampil lebih sedikit | Tabel hasil hitungan |
+| Berlaku sampai | `:reset-session` atau dihapus | Hanya untuk query itu |
+| Mencocokkan | Seluruh baris (regex) | Kolom tertentu (`sc_status`, `c_ip`, ...) |
+
+Bila ingin jumlah yang akurat, gunakan SQL. Jika ingin melihat dan membaca baris-baris tertentu, gunakan filter `:`.
+
+### 2.7 Contoh Alur Pemakaian
+
+```
+:filter-out /healthz                       # buang kebisingan health check
+:filter-out /static/|/images/|/favicon.ico # buang file statis
+:hide-lines-before 2026-11-10 13:00:00     # mulai dari jam 13:00
+:hide-lines-after 2026-11-10 14:00:00      # sampai jam 14:00
+:highlight 50[0-9]                         # sorot status 5xx
+```
+
+Setelah selesai membaca:
+```
+:show-lines-before-and-after
+:clear-highlight 50[0-9]
+:reset-session
+```
+
+---
+
+## 3. Satu Baris Log dan Kolomnya
 
 Contoh satu baris log:
 
@@ -80,7 +198,7 @@ lnav biasanya mewarnai baris 4xx sebagai *warning* (kuning) dan 5xx sebagai *err
 
 ---
 
-## 3. Kerangka Dasar SQL
+## 4. Kerangka Dasar SQL
 
 ```sql
 SELECT   kolom, count(*)      -- apa yang ditampilkan
@@ -137,11 +255,11 @@ Urutan penulisan harus selalu seperti di atas. Bagian opsional boleh dibuang.
 
 ---
 
-## 4. Query Siap Pakai
+## 5. Query Siap Pakai
 
 Salin query (termasuk `;` di awal), tempel di lnav, lalu ubah bagian yang perlu.
 
-### 4.1 Gambaran Umum
+### 5.1 Gambaran Umum
 
 **Total baris log**
 ```sql
@@ -167,7 +285,7 @@ Berapa pengunjung berbeda (berdasarkan IP).
 ```
 `*` berarti semua kolom. Berguna untuk mengenali isi tabel.
 
-### 4.2 Status Code
+### 5.2 Status Code
 
 **Jumlah per status**
 ```sql
@@ -199,7 +317,7 @@ Siapa, kapan, dan halaman mana yang memicu error server.
 ```
 Halaman yang dicari tetapi tidak ada. Bisa tautan rusak, atau pencarian oleh scanner.
 
-### 4.3 Analisis IP
+### 5.3 Analisis IP
 
 **10 IP paling aktif**
 ```sql
@@ -231,7 +349,7 @@ Pengunjung biasa mengakses sedikit halaman, sedangkan scanner mencoba puluhan pa
 ```
 Mengikuti jejak satu IP dari awal sampai akhir. Ganti alamat IP-nya.
 
-### 4.4 Analisis Halaman
+### 5.4 Analisis Halaman
 
 **5 halaman paling sering diakses**
 ```sql
@@ -251,7 +369,7 @@ Lonjakan `POST` yang tidak wajar bisa berarti serangan atau spam.
 ```
 Menyembunyikan CSS/JS/gambar agar fokus ke halaman dan API.
 
-### 4.5 Analisis Waktu
+### 5.5 Analisis Waktu
 
 **Request per jam**
 ```sql
@@ -283,7 +401,7 @@ Durasi insiden dan jumlah request yang terdampak.
 ```
 Menyorot satu jam kejadian. Ganti tanggal dan jamnya.
 
-### 4.6 Traffic (Bytes)
+### 5.6 Traffic (Bytes)
 
 **Total traffic dalam MB**
 ```sql
@@ -303,7 +421,7 @@ Berguna menemukan pengunduh data besar.
 ```
 File atau respons paling besar yang dikirim server.
 
-### 4.7 User-Agent dan Bot
+### 5.7 User-Agent dan Bot
 
 **User-Agent paling umum**
 ```sql
@@ -317,7 +435,7 @@ Browser biasanya diawali `Mozilla/5.0`. Nama seperti `python-requests`, `curl`, 
 ```
 Perhatikan: bot resmi seperti Googlebot juga diawali `Mozilla/5.0`, jadi tidak muncul di sini.
 
-### 4.8 Deteksi Keamanan
+### 5.8 Deteksi Keamanan
 
 **Brute force login (banyak 401)**
 ```sql
@@ -345,7 +463,7 @@ IP yang diblok karena terlalu banyak request, beserta rentang waktunya.
 
 ---
 
-## 5. Ekspor Hasil (Non-interaktif)
+## 6. Ekspor Hasil (Non-interaktif)
 
 Jalankan di terminal biasa (bukan di dalam lnav):
 
@@ -363,7 +481,7 @@ lnav -n -c ';SELECT sc_status, count(*) FROM access_log GROUP BY sc_status' nama
 
 ---
 
-## 6. Alur Investigasi Singkat
+## 7. Alur Investigasi Singkat
 
 1. **Gambaran umum:** jumlah baris, rentang waktu, distribusi status.
 2. **Cari anomali:** status 5xx dan 4xx, IP teratas, lonjakan per jam.
@@ -373,7 +491,7 @@ lnav -n -c ';SELECT sc_status, count(*) FROM access_log GROUP BY sc_status' nama
 
 ---
 
-## 7. Kesalahan Umum
+## 8. Kesalahan Umum
 
 | Masalah | Penyebab / Solusi |
 |---|---|
@@ -383,10 +501,12 @@ lnav -n -c ';SELECT sc_status, count(*) FROM access_log GROUP BY sc_status' nama
 | Terkeluar dari lnav | `q` ditekan dua kali; satu kali sudah cukup untuk kembali dari hasil SQL |
 | Jam tidak sesuai | Jalankan dengan `TZ=UTC lnav ...` jika log bertanda `+0000` |
 | Hitungan terpecah-pecah | Gunakan `cs_uri_stem` (bukan gabungan dengan parameter) untuk `GROUP BY` |
+| Filter `:` tidak menyembunyikan apa-apa | Teks atau pola tidak cocok dengan isi baris. Periksa ejaan dan karakter khusus (`.` perlu ditulis `\.`), lalu cek panel filter dengan `Tab` |
+| Dua filter, hasilnya tidak sesuai | Filter menumpuk. Pastikan tidak ada filter lama yang masih aktif, atau jalankan `:reset-session` lalu buat ulang |
 
 ---
 
-## 8. Ringkasan Cepat (Contekan)
+## 9. Ringkasan Cepat (Contekan)
 
 ```
 SELECT kolom, count(*) FROM access_log
